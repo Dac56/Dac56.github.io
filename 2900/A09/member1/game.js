@@ -280,6 +280,81 @@ const G = ( function () {
 				return;
 			}
 
+			var exports = {
+				move : function ( h, v ) {
+				var nx, ny;
+			   
+				// Calculate proposed new location.
+			   
+				nx = grab_x + h;
+				ny = grab_y + v;
+			   
+				// Is there a wall in the proposed location?
+				// If the bead there is COLOR_WALL (black),
+				// exit without moving.
+			   
+				if ( PS.color( nx, ny ) === COLOR_WALL ) {
+				return;
+				}
+			   
+				// Is new location off the grid?
+				// If so, exit without moving.
+				// NOTE: Current map design would never
+				// allow grabber to get past the edge walls.
+				// This code will prevent errors if
+				// the map layout is changed.
+			   
+				if ( ( nx < 0 ) || ( nx >= WIDTH ) ||
+				( ny < 0 ) || ( ny >= HEIGHT ) ) {
+				return;
+				}
+			   
+				// Legal move, so change current grabber
+				// location to floor color.
+			   
+				PS.color( grab_x, grab_y, COLOR_FLOOR );
+			   
+				// Assign grabber's color to the
+				// new location.
+			   
+				PS.color ( nx, ny, COLOR_GRAB );
+			   
+				// Finally, update grabber's position
+			   
+				grab_x = nx;
+				grab_y = ny;
+				}
+			   };
+			   
+			   PS.keyDown = function( key, shift, ctrl, options ) {
+				switch ( key ) {
+				case PS.KEY_ARROW_UP:
+				case 119:
+				case 87: {
+				G.move( 0, -1 ); // move UP (v = -1)
+				break;
+				}
+				case PS.KEY_ARROW_DOWN:
+				case 115:
+				case 83: {
+				G.move( 0, 1 ); // move DOWN (v = 1)
+				break;
+				}
+				case PS.KEY_ARROW_LEFT:
+				case 97:
+				case 65: {
+				G.move( -1, 0 ); // move LEFT (h = -1)
+				break;
+				}
+				case PS.KEY_ARROW_RIGHT:
+				case 100:
+				case 68: {
+				G.move( 1, 0 ); // move RIGHT (h = 1)
+				break;
+				}
+				}
+			   };
+
 			// Use pathfinder to calculate a line from current actor position
 			// to touched position
 
