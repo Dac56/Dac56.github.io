@@ -38,6 +38,64 @@ If you don't use JSHint (or are using it with a configuration file), you can saf
 
 "use strict"; // Do NOT remove this directive!
 
+var G; // establish game namespace
+
+( function () {
+	var id; // sprite identifier
+	var xpos = 6; // x-pos of sprite
+	var ypos = 6; // y-pos of sprite
+
+	var floorPlane = 0;
+	var spritePlane = 1;
+
+	G = {
+		width : 15, // width of grid
+		height : 15, // height of grid
+
+		// Draw floor and initialize sprite
+
+		drawMap : function () {
+			var x, y, val;
+
+			// Create random gray floor
+
+			PS.gridPlane( floorPlane );
+			for ( y = 0; y < G.height; y += 1 ) {
+				for ( x = 0; x < G.width; x += 1 ) {
+					val = ( PS.random(32) - 1 ) + 128;
+					PS.color( x, y, val, val, val );
+				}
+			}
+
+			// Create 3x3 solid sprite, save its ID
+
+			id = PS.spriteSolid( 3, 3 );
+
+			// Set color to red
+
+			PS.spriteSolidColor( id, PS.COLOR_RED );
+
+			// Set plane to 1 (above floor)
+
+			PS.spritePlane( id, spritePlane );
+
+			// Position sprite at center of grid
+
+			PS.spriteMove( id, xpos, ypos );
+		},
+
+		// move( x, y )
+		// Move sprite relative to current position
+
+		move : function ( x, y ) {
+			xpos = xpos + x;
+			ypos = ypos + y;
+			PS.spriteMove( id, xpos, ypos );
+			PS.audioPlay( "fx_click" );
+		}
+	};
+}() );
+
 /*
 PS.init( system, options )
 Called once after engine is initialized but before event-polling begins.
@@ -64,24 +122,18 @@ PS.init = function( system, options ) {
 	// Uncomment the following code line and change
 	// the x and y parameters as needed.
 
-	PS.gridSize( 16, 16 );
-
 	// This is also a good place to display
 	// your game title or a welcome message
 	// in the status line above the grid.
 	// Uncomment the following code line and
 	// change the string parameter as needed.
 
-	PS.statusText( "First Test" );
-
 	// Add any other initialization code you need here.
-	var id_sprite;
-	var xpos = 0;
-	var ypos = 0
-	id_sprite = PS.spriteSolid( 1, 1 );
-			PS.spriteSolidColor( id_sprite, PS.COLOR_GREEN );
-			PS.spritePlane( id_sprite, 1 );
-			PS.spriteMove( id_sprite, xpos, ypos );
+	PS.gridSize( G.width, G.height ); // init grid
+	PS.border( PS.ALL, PS.ALL, 0 ); // no borders
+	G.drawMap(); // draws walls
+	PS.audioLoad( "fx_click" ); // preload sound
+	PS.statusText( "Use arrow/WASD keys to move" );
 };
 
 /*
@@ -173,13 +225,6 @@ PS.exitGrid = function( options ) {
 	// Add code here for when the mouse cursor/touch moves off the grid.
 };
 
-move = function ( x, y ) {
-	xpos = xpos + x;
-	ypos = ypos + y;
-	PS.spriteMove( id_sprite, xpos, ypos );
-	PS.audioPlay( "fx_click" );
-	}
-
 /*
 PS.keyDown ( key, shift, ctrl, options )
 Called when a key on the keyboard is pressed.
@@ -197,27 +242,31 @@ PS.keyDown = function( key, shift, ctrl, options ) {
 	
 	switch ( key ) {
 		case PS.KEY_ARROW_UP:
-		case 119:
-		case 87: {
-			PS.spriteMove( id_sprite, 0, -1 ); // move UP (v = -1)
+		case 119: // lower-case w
+		case 87: // upper-case W
+		{
+			G.move( 0, -1 );
 			break;
 		}
 		case PS.KEY_ARROW_DOWN:
-		case 115:
-		case 83: {
-			move( 0, 1 ); // move DOWN (v = 1)
+		case 115: // lower-case s
+		case 83: // upper-case S
+		{
+			G.move( 0, 1 );
 			break;
 		}
 		case PS.KEY_ARROW_LEFT:
-		case 97:
-		case 65: {
-			move( -1, 0 ); // move LEFT (h = -1)
+		case 97: // lower-case a
+		case 65: // upper-case A
+		{
+			G.move( -1, 0 );
 			break;
 		}
 		case PS.KEY_ARROW_RIGHT:
-		case 100:
-		case 68: {
-			move( 1, 0 ); // move RIGHT (h = 1)
+		case 100: // lower-case d
+		case 68: // upper-case D
+		{
+			G.move( 1, 0 );
 			break;
 		}
 	}
